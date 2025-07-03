@@ -198,7 +198,7 @@ function getIssuerIcon(issuer) {
   if (name.includes('steam')) return '../assets/steam.png';
   if (name.includes('yahoo')) return '../assets/yahoo.png';
   if (name.includes('zoom')) return '../assets/zoom.png';
-  return '../assets/default.png';
+  return '../assets/default-auth.png';
 }
 
 /**
