@@ -24,6 +24,8 @@
     "tailwindcss": "^3.4.0"
   },
   "dependencies": {
-    "@electron/remote": "^2.1.2"
+    "@electron/remote": "^2.1.2",
+    "googleapis": "^105.0.0",
+    "open": "^10.1.2"
   }
 }

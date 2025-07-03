@@ -39,4 +39,70 @@
 }
 #custom-modal .transition {
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+/* Glassmorphic button style */
+.glass-btn {
+  background: rgba(144, 72, 224, 0.32); /* More #9048e0, more visible */
+  color: #fff;
+  border: 1.5px solid rgba(144, 72, 224, 0.45);
+  box-shadow: 0 4px 24px 0 rgba(144, 72, 224, 0.12), 0 1.5px 4px 0 rgba(0,0,0,0.10);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 0.5rem; /* Slight roundness */
+  transition: background 0.2s, box-shadow 0.2s, border 0.2s;
+}
+.glass-btn:hover, .glass-btn:focus {
+  background: rgba(144, 72, 224, 0.45);
+  border-color: #9048e0;
+  box-shadow: 0 6px 32px 0 rgba(144, 72, 224, 0.18), 0 2px 8px 0 rgba(0,0,0,0.12);
+}
+
+/* Glassmorphic card style for TOTP cards */
+.glass-card {
+  background: rgba(144, 72, 224, 0.22); /* More #9048e0, more visible */
+  border: 1.5px solid rgba(144, 72, 224, 0.32);
+  box-shadow: 0 2px 16px 0 rgba(144, 72, 224, 0.10), 0 1px 2px 0 rgba(0,0,0,0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 0.5rem; /* Slight roundness */
+  color: #fff;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* Remove blue, set accent color */
+.bg-primary {
+  background: #9048e0 !important;
+}
+.text-primary {
+  color: #9048e0 !important;
+}
+.border-primary {
+  border-color: #9048e0 !important;
+}
+
+/* Secondary/dark button */
+.glass-btn-dark {
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  border: 1.5px solid rgba(144, 72, 224, 0.18);
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 0.5rem; /* Slight roundness */
+  transition: background 0.2s, box-shadow 0.2s, border 0.2s;
+}
+.glass-btn-dark:hover, .glass-btn-dark:focus {
+  background: rgba(24, 20, 32, 0.65);
+  border-color: #9048e0;
+}
+
+/* Accent border for input fields */
+input, textarea, select {
+  border-color: #9048e0 !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #9048e0 !important;
+  box-shadow: 0 0 0 2px rgba(144, 72, 224, 0.25);
+  outline: none;
 } 

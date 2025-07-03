@@ -8,6 +8,7 @@ const Vault = require('../models/Vault');
 const TOTPAccount = require('../models/TOTPAccount');
 const { generateTOTP } = require('../services/totpService');
 const path = require('path');
+const os = require('os');
 
 // =========================
 // UI Element References
@@ -56,6 +57,12 @@ const exportModal = document.getElementById('export-modal');
 const exportDat = document.getElementById('export-dat');
 const exportJson = document.getElementById('export-json');
 const exportCancel = document.getElementById('export-cancel');
+const importFindBtn = document.getElementById('import-find-btn');
+const importManualBtn = document.getElementById('import-manual-btn');
+const welcomeContainer = document.getElementById('welcome-container');
+const welcomeCreateBtn = document.getElementById('welcome-create-btn');
+const welcomeImportLocalBtn = document.getElementById('welcome-import-local-btn');
+const welcomeImportGoogleBtn = document.getElementById('welcome-import-google-btn');
 
 // =========================
 // State
@@ -67,6 +74,7 @@ let timer = null;
 let importFilePath = null;
 let autoLockTimer = null;
 const AUTO_LOCK_SECONDS = 120;
+let lockoutInterval = null;
 
 // =========================
 // Custom Modal Logic
@@ -136,6 +144,7 @@ function show(container) {
   setupContainer.classList.add('hidden');
   unlockContainer.classList.add('hidden');
   mainContainer.classList.add('hidden');
+  welcomeContainer.classList.add('hidden');
   container.classList.remove('hidden');
 }
 
@@ -211,19 +220,19 @@ function renderAccounts() {
     const seconds = Math.floor(now / 1000);
     const secondsLeft = 30 - (seconds % 30);
     const item = document.createElement('div');
-    item.className = 'totp-card flex items-center justify-between bg-[#5c77ff] rounded-xl px-4 py-3 mb-3 cursor-pointer select-none relative';
+    item.className = 'totp-card glass-card flex items-center justify-between rounded-xl px-4 py-3 mb-1 cursor-pointer select-none relative';
     item.style.userSelect = 'none';
     item.innerHTML = `
       <div class='flex items-center gap-3'>
         <img src="${icon}" alt="${acc.issuer || 'Issuer'}" class="w-8 h-8 rounded-full bg-white p-1" />
         <div class='flex flex-col'>
-          <span class='text-black font-semibold leading-tight text-base'>${acc.label}</span>
-          <span class='text-xs text-black opacity-70'>${addedDate}</span>
+          <span class='text-white font-semibold leading-tight text-base'>${acc.label}</span>
+          <span class='text-gray-200 text-xs'>${addedDate}</span>
         </div>
       </div>
       <div class='flex flex-col items-end'>
-        <span class='font-mono text-2xl tracking-widest text-black select-all totp-code' data-code='${code}'>${code}</span>
-        <span class='text-xs text-black opacity-80 countdown-timer'>${secondsLeft}s</span>
+        <span class='font-mono text-2xl tracking-widest text-white select-all totp-code' data-code='${code}'>${code}</span>
+        <span class='text-xs text-gray-300 countdown-timer'>${secondsLeft}s</span>
       </div>
     `;
     // Click to copy
@@ -246,14 +255,16 @@ function renderAccounts() {
       // Create menu
       const menu = document.createElement('div');
       menu.id = 'context-menu';
-      menu.className = 'absolute z-50 bg-white border border-gray-300 rounded shadow text-black text-sm';
-      menu.style.top = `${e.offsetY}px`;
-      menu.style.left = `${e.offsetX}px`;
+      menu.className = 'absolute z-[100] bg-[#23272e] border border-gray-700 rounded-lg shadow-lg text-white text-sm';
+      // Position menu at mouse click, relative to viewport
+      const rect = item.getBoundingClientRect();
+      menu.style.top = `${rect.top + e.offsetY}px`;
+      menu.style.left = `${rect.left + e.offsetX}px`;
       menu.innerHTML = `
-        <div class='context-edit px-4 py-2 hover:bg-gray-100 cursor-pointer'>Edit</div>
-        <div class='context-delete px-4 py-2 hover:bg-gray-100 cursor-pointer'>Delete</div>
+        <div class='context-edit px-4 py-2 hover:bg-gray-800 cursor-pointer rounded-t-lg'>Edit</div>
+        <div class='context-delete px-4 py-2 hover:bg-gray-800 cursor-pointer rounded-b-lg'>Delete</div>
       `;
-      item.appendChild(menu);
+      document.body.appendChild(menu);
       // Edit
       menu.querySelector('.context-edit').onclick = (ev) => {
         ev.stopPropagation();
@@ -378,9 +389,35 @@ setupBtn.addEventListener('click', async () => {
   }
 });
 
+// =========================
+// Rate limiting for unlock attempts
+let failedUnlockAttempts = 0;
+let unlockLockoutUntil = 0;
+const MAX_UNLOCK_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 30000; // 30 seconds
+
 // Password Unlock
 unlockBtn.addEventListener('click', async () => {
   unlockError.textContent = '';
+  const now = Date.now();
+  if (unlockLockoutUntil > now) {
+    if (!lockoutInterval) {
+      lockoutInterval = setInterval(() => {
+        const nowInner = Date.now();
+        if (unlockLockoutUntil > nowInner) {
+          const secondsLeft = Math.ceil((unlockLockoutUntil - nowInner) / 1000);
+          unlockError.textContent = `Too many failed attempts. Try again in ${secondsLeft} seconds.`;
+        } else {
+          unlockError.textContent = '';
+          clearInterval(lockoutInterval);
+          lockoutInterval = null;
+        }
+      }, 1000);
+    }
+    const secondsLeft = Math.ceil((unlockLockoutUntil - now) / 1000);
+    unlockError.textContent = `Too many failed attempts. Try again in ${secondsLeft} seconds.`;
+    return;
+  }
   try {
     masterPassword = unlockPassword.value;
     vault = await Vault.load(masterPassword);
@@ -388,22 +425,123 @@ unlockBtn.addEventListener('click', async () => {
     renderAccounts();
     startTimer();
     clearForm();
+    failedUnlockAttempts = 0; // Reset on success
+    if (lockoutInterval) {
+      clearInterval(lockoutInterval);
+      lockoutInterval = null;
+    }
   } catch (e) {
-    if (e.message && e.message.includes('not found')) {
-      unlockError.textContent = 'Vault file not found. Please set up a new vault.';
-    } else if (e.message && e.message.includes('Unexpected token')) {
-      unlockError.textContent = 'Vault file is corrupted or not valid.';
+    failedUnlockAttempts++;
+    if (failedUnlockAttempts >= MAX_UNLOCK_ATTEMPTS) {
+      unlockLockoutUntil = Date.now() + LOCKOUT_DURATION_MS;
+      if (!lockoutInterval) {
+        lockoutInterval = setInterval(() => {
+          const nowInner = Date.now();
+          if (unlockLockoutUntil > nowInner) {
+            const secondsLeft = Math.ceil((unlockLockoutUntil - nowInner) / 1000);
+            unlockError.textContent = `Too many failed attempts. Try again in ${secondsLeft} seconds.`;
+          } else {
+            unlockError.textContent = '';
+            clearInterval(lockoutInterval);
+            lockoutInterval = null;
+          }
+        }, 1000);
+      }
+      unlockError.textContent = `Too many failed attempts. Locked for ${LOCKOUT_DURATION_MS / 1000} seconds.`;
     } else {
-      unlockError.textContent = 'Incorrect password or vault corrupted.';
+      if (e.message && e.message.includes('not found')) {
+        unlockError.textContent = 'Vault file not found. Please set up a new vault.';
+      } else if (e.message && e.message.includes('Unexpected token')) {
+        unlockError.textContent = 'Vault file is corrupted or not valid.';
+      } else {
+        unlockError.textContent = 'Incorrect password or vault corrupted.';
+      }
     }
   }
 });
 
-// Import Vault
+// Helper to get backup path in user's local app data (Windows only)
+function getBackupPath() {
+  const home = os.homedir();
+  const backupDir = path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'PrivenBackup');
+  return path.join(backupDir, 'vault_backup.dat');
+}
+
+// Import Vault (open modal)
 importBtn.addEventListener('click', async () => {
   if (!(await window.confirm("Importing a vault will replace any existing data (if any). Continue?"))) {
     return;
   }
+  importPasswordInput.value = '';
+  importError.textContent = '';
+  importModal.classList.remove('hidden');
+  importFile.value = '';
+});
+
+menuImport.addEventListener('click', async () => {
+  importPasswordInput.value = '';
+  importError.textContent = '';
+  importModal.classList.remove('hidden');
+  importFile.value = '';
+});
+
+// Let app find backup
+importFindBtn.addEventListener('click', async () => {
+  importError.textContent = '';
+  const password = importPasswordInput.value;
+  if (!password) {
+    importError.textContent = 'Please enter the master password.';
+    return;
+  }
+  const fs = require('fs');
+  const backupPath = getBackupPath();
+  if (!fs.existsSync(backupPath)) {
+    importError.textContent = "No automatic backup found. Please select your backup file manually.";
+    return;
+  }
+  try {
+    const raw = fs.readFileSync(backupPath, 'utf8');
+    let encrypted;
+    try {
+      encrypted = JSON.parse(raw);
+    } catch (err) {
+      importError.textContent = 'The backup file is not a valid vault file (invalid JSON).';
+      return;
+    }
+    if (!encrypted || typeof encrypted !== 'object' || !encrypted.salt || !encrypted.iv || !encrypted.tag || !encrypted.data) {
+      importError.textContent = 'The backup file is not a valid encrypted vault.';
+      return;
+    }
+    let data;
+    try {
+      const { decrypt } = require('../services/encryptionService');
+      data = await decrypt(encrypted, password);
+    } catch (err) {
+      importError.textContent = 'Failed to decrypt vault: ' + err.message;
+      return;
+    }
+    if (!data || typeof data !== 'object' || !Array.isArray(data.accounts)) {
+      importError.textContent = 'The vault file is missing required data or is corrupted.';
+      return;
+    }
+    for (const acc of data.accounts) {
+      if (!acc.label || !acc.secret) {
+        importError.textContent = 'The vault contains invalid account data.';
+        return;
+      }
+    }
+    const Vault = require('../models/Vault');
+    await Vault.importVault(backupPath, password);
+    importModal.classList.add('hidden');
+    await window.alert('Vault imported successfully! Please unlock with the imported password.');
+    window.location.reload();
+  } catch (err) {
+    importError.textContent = 'Failed to import vault: ' + err.message;
+  }
+});
+
+// Manual file select
+importManualBtn.addEventListener('click', () => {
   importFile.value = '';
   importFile.click();
 });
@@ -419,60 +557,50 @@ importFile.addEventListener('change', async (e) => {
   importFilePath = file.path || (file.webkitRelativePath ? file.webkitRelativePath : '');
   importPasswordInput.value = '';
   importError.textContent = '';
-  importModal.classList.remove('hidden');
-  importPasswordInput.focus();
-});
-
-importSubmit.addEventListener('click', async () => {
-  const password = importPasswordInput.value;
-  if (!password) {
-    importError.textContent = 'Please enter the master password.';
-    return;
-  }
+  // Now, let user enter password and click 'Let app find backup' again, but with importFilePath set
+  // Or, for better UX, trigger import immediately:
+  importModal.classList.add('hidden');
+  // Reuse the import logic
   try {
-    // Read and parse the file
+    const password = await window.prompt('Enter the master password for the selected vault file:');
+    if (!password) return;
     const fs = require('fs');
     const raw = fs.readFileSync(importFilePath, 'utf8');
     let encrypted;
     try {
       encrypted = JSON.parse(raw);
     } catch (err) {
-      importError.textContent = 'The selected file is not a valid vault file (invalid JSON).';
+      alert('The selected file is not a valid vault file (invalid JSON).');
       return;
     }
-    // Basic structure check
     if (!encrypted || typeof encrypted !== 'object' || !encrypted.salt || !encrypted.iv || !encrypted.tag || !encrypted.data) {
-      importError.textContent = 'The selected file is not a valid encrypted vault.';
+      alert('The selected file is not a valid encrypted vault.');
       return;
     }
-    // Try to decrypt and validate structure
     let data;
     try {
       const { decrypt } = require('../services/encryptionService');
       data = await decrypt(encrypted, password);
     } catch (err) {
-      importError.textContent = 'Failed to decrypt vault: ' + err.message;
+      alert('Failed to decrypt vault: ' + err.message);
       return;
     }
     if (!data || typeof data !== 'object' || !Array.isArray(data.accounts)) {
-      importError.textContent = 'The vault file is missing required data or is corrupted.';
+      alert('The vault file is missing required data or is corrupted.');
       return;
     }
-    // Optionally: validate each account object
     for (const acc of data.accounts) {
       if (!acc.label || !acc.secret) {
-        importError.textContent = 'The vault contains invalid account data.';
+        alert('The vault contains invalid account data.');
         return;
       }
     }
-    // If all checks pass, replace the vault
     const Vault = require('../models/Vault');
     await Vault.importVault(importFilePath, password);
-    importModal.classList.add('hidden');
-    alert('Vault imported. Please unlock with the imported password.');
+    await window.alert('Vault imported successfully! Please unlock with the imported password.');
     window.location.reload();
   } catch (err) {
-    importError.textContent = 'Failed to import vault: ' + err.message;
+    alert('Failed to import vault: ' + err.message);
   }
 });
 
@@ -568,7 +696,7 @@ formCancel.addEventListener('click', () => {
   if (await checkVaultExists()) {
     show(unlockContainer);
   } else {
-    show(setupContainer);
+    show(welcomeContainer);
   }
 })();
 
@@ -765,8 +893,16 @@ resetSave.addEventListener('click', async () => {
   }
 });
 
-// Hamburger menu import logic
-menuImport.addEventListener('click', () => {
-  menuDropdown.classList.add('hidden');
-  importBtn.click(); // Reuse the existing import logic
+// Welcome screen button logic
+welcomeCreateBtn.addEventListener('click', () => {
+  show(setupContainer);
+});
+welcomeImportLocalBtn.addEventListener('click', () => {
+  importPasswordInput.value = '';
+  importError.textContent = '';
+  importModal.classList.remove('hidden');
+  importFile.value = '';
+});
+welcomeImportGoogleBtn.addEventListener('click', () => {
+  window.alert('Import from Google Drive is coming soon!');
 }); 

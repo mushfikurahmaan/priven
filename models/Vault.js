@@ -2,8 +2,19 @@
 const fs = require('fs');
 const path = require('path');
 const { encrypt, decrypt } = require('../services/encryptionService');
+const os = require('os');
 
 const VAULT_FILE = path.join(__dirname, '..', 'vault.dat');
+
+// Helper to get backup path in user's local app data (Windows only)
+function getBackupPath() {
+  const home = os.homedir();
+  const backupDir = path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'PrivenBackup');
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir, { recursive: true });
+  }
+  return path.join(backupDir, 'vault_backup.dat');
+}
 
 class Vault {
   constructor(accounts = []) {
@@ -39,6 +50,9 @@ class Vault {
   async save(password) {
     const encrypted = await encrypt({ accounts: this.accounts }, password);
     fs.writeFileSync(VAULT_FILE, JSON.stringify(encrypted), 'utf8');
+    // Automatic local backup (overwrite previous)
+    const backupPath = getBackupPath();
+    fs.writeFileSync(backupPath, JSON.stringify(encrypted), 'utf8');
   }
 
   addAccount(account) {
