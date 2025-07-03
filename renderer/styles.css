@@ -1,0 +1,32 @@
+/*
+ * styles.css - Priven TOTP Authenticator
+ * Organized and cleaned for maintainability
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   Custom Scrollbar Styles
+   ========================= */
+#accounts-list::-webkit-scrollbar {
+  width: 8px;
+  background: #181c20;
+  border-radius: 9999px;
+}
+#accounts-list::-webkit-scrollbar-thumb {
+  background: #5271ff;
+  border-radius: 9999px;
+}
+#accounts-list::-webkit-scrollbar-thumb:hover {
+  background: #5c77ff;
+}
+#accounts-list::-webkit-scrollbar-track {
+  background: #181c20;
+  border-radius: 9999px;
+}
+#accounts-list {
+  scrollbar-width: thin;
+  scrollbar-color: #5271ff #181c20;
+} 

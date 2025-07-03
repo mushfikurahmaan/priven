@@ -1,0 +1,25 @@
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output
+/dist/
+/build/
+
+# Tailwind output
+renderer/output.css
+
+# Sensitive data
+vault.dat
+*.env
+
+# Misc
+*.log 

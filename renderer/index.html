@@ -1,0 +1,102 @@
+<!--
+  index.html - Priven TOTP Authenticator
+  Organized and cleaned for maintainability
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=400, initial-scale=1.0">
+  <title>Priven - TOTP Authenticator</title>
+  <link href="./output.css" rel="stylesheet">
+</head>
+<body class="bg-[#111518] w-screen h-screen min-h-screen min-w-screen overflow-hidden">
+  <!-- =========================
+       Login Screen
+       ========================= -->
+  <div id="unlock-container">
+    <div class="w-screen h-screen flex flex-col justify-between items-center bg-black">
+      <div class="flex-1 flex flex-col justify-center items-center w-full" style="min-height: 0;">
+        <img src="../assets/logo.png" alt="Priven Logo" class="w-24 h-24 mb-4 mt-2 select-none" draggable="false" />
+        <h1 class="text-white text-4xl font-extrabold leading-tight mb-0">Priven</h1>
+        <span class="text-white text-lg opacity-70 mb-10 -mt-1">Minimal TOTP Authenticator</span>
+        <div class="relative w-4/5 max-w-md mb-4">
+          <input id="unlock-password" type="password" placeholder="Master password" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
+          <button id="toggle-unlock-password" type="button" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none">
+            <svg id="unlock-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+          </button>
+        </div>
+        <div id="unlock-error" class="text-xs text-red-400 mb-8"></div>
+      </div>
+      <div class="w-full flex flex-col gap-3 items-center mb-10">
+        <button id="unlock-btn" class="w-4/5 max-w-md bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition text-sm">Unlock</button>
+      </div>
+    </div>
+  </div>
+  <!-- =========================
+       Setup (Master Password) Screen
+       ========================= -->
+  <div id="setup-container" class="hidden flex flex-col gap-4 items-center justify-center w-screen h-screen bg-black">
+    <img src="../assets/logo.png" alt="Priven Logo" class="w-24 h-24 mb-2 mt-2 select-none" draggable="false" />
+    <h1 class="text-white text-4xl font-extrabold leading-tight mb-0">Priven</h1>
+    <span class="text-white text-lg opacity-70 mb-6 -mt-1">Minimal TOTP Authenticator</span>
+    <div class="relative w-4/5 max-w-md">
+      <input id="setup-password" type="password" placeholder="Master password" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
+      <button id="toggle-setup-password" type="button" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none">
+        <svg id="setup-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+      </button>
+    </div>
+    <div class="relative w-4/5 max-w-md">
+      <input id="setup-confirm" type="password" placeholder="Confirm password" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
+      <button id="toggle-setup-confirm" type="button" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none">
+        <svg id="setup-confirm-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+      </button>
+    </div>
+    <div id="setup-strength" class="text-xs mb-1 text-gray-400"></div>
+    <button id="setup-btn" class="w-4/5 max-w-md bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Set Password</button>
+    <span class="text-white text-xs opacity-70 mt-2 mb-1">Have a vault? import it</span>
+    <button id="import-btn" class="w-4/5 max-w-md bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Import Vault</button>
+    <input id="import-file" type="file" accept=".dat" class="hidden" />
+    <div id="setup-error" class="text-xs text-red-400"></div>
+    <div class="text-white text-xs opacity-50 font-normal mt-4 text-center">⚠️ If you lose your master password, your vault cannot be recovered.</div>
+  </div>
+  <!-- =========================
+       Main App Screen
+       ========================= -->
+  <div id="main-container" class="hidden w-screen h-screen flex flex-col bg-black">
+    <div class="flex items-center justify-between mb-4 p-6">
+      <span class="font-bold text-white text-base">Your TOTP Accounts</span>
+      <button id="export-btn" class="bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400">Export Vault</button>
+    </div>
+    <div id="accounts-list" class="flex flex-col gap-3 px-6 flex-1 overflow-y-auto" style="min-height:0;"></div>
+    <div class="w-full flex flex-col">
+      <button id="add-btn" class="w-[calc(100%-3rem)] mx-6 mb-6 bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Add another</button>
+      <!-- Add/Edit Form -->
+      <div id="account-form" class="mt-2 hidden flex flex-col gap-2 px-6 mb-6">
+        <input id="form-label" type="text" placeholder="Label" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+        <input id="form-issuer" type="text" placeholder="Issuer" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+        <input id="form-secret" type="text" placeholder="Secret (base32)" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+        <div class="flex gap-2 mt-2 w-full">
+          <button id="form-save" class="flex-1 bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Save</button>
+          <button id="form-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-md transition">Cancel</button>
+        </div>
+        <div id="form-error" class="text-xs text-red-400 mt-1"></div>
+      </div>
+    </div>
+  </div>
+  <!-- =========================
+       Import Vault Modal
+       ========================= -->
+  <div id="import-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden">
+    <div class="bg-[#181c20] rounded-xl shadow-lg p-8 w-full max-w-xs flex flex-col items-center">
+      <h2 class="text-white text-xl font-bold mb-4">Import Vault</h2>
+      <input id="import-password" type="password" placeholder="Master password for vault" class="w-full mb-4 rounded-md px-4 py-3 bg-[#23272e] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+      <button id="import-submit" class="w-full bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition mb-2">Import</button>
+      <button id="import-cancel" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-md transition">Cancel</button>
+      <div id="import-error" class="text-xs text-red-400 mt-2"></div>
+    </div>
+  </div>
+  <script src="./renderer.js"></script>
+</body>
+</html> 
