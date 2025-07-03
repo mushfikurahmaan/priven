@@ -59,7 +59,6 @@
     <button id="import-btn" class="w-4/5 max-w-md bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Import Vault</button>
     <input id="import-file" type="file" accept=".dat" class="hidden" />
     <div id="setup-error" class="text-xs text-red-400"></div>
-    <div class="text-white text-xs opacity-50 font-normal mt-4 text-center">⚠️ If you lose your master password, your vault cannot be recovered.</div>
   </div>
   <!-- =========================
        Main App Screen
@@ -67,11 +66,25 @@
   <div id="main-container" class="hidden w-screen h-screen flex flex-col bg-black">
     <div class="flex items-center justify-between mb-4 p-6">
       <span class="font-bold text-white text-base">Your TOTP Accounts</span>
-      <button id="export-btn" class="bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition focus:outline-none focus:ring-2 focus:ring-blue-400">Export Vault</button>
+      <!-- Hamburger Menu -->
+      <div class="relative">
+        <button id="menu-btn" class="flex items-center justify-center w-10 h-10 rounded-lg bg-[#181c20] hover:bg-[#23272e] focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="18" x2="20" y2="18" />
+          </svg>
+        </button>
+        <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-[#23272e] rounded-lg shadow-lg z-50 py-2">
+          <button id="menu-export-data" class="w-full text-left px-4 py-2 text-white hover:bg-[#5c77ff] rounded-t-lg transition">Export data</button>
+          <button id="menu-reset" class="w-full text-left px-4 py-2 text-white hover:bg-[#5c77ff] transition">Reset master password</button>
+          <button id="menu-import" class="w-full text-left px-4 py-2 text-white hover:bg-[#5c77ff] rounded-b-lg transition">Import another vault</button>
+        </div>
+      </div>
     </div>
     <div id="accounts-list" class="flex flex-col gap-3 px-6 flex-1 overflow-y-auto" style="min-height:0;"></div>
     <div class="w-full flex flex-col">
-      <button id="add-btn" class="w-[calc(100%-3rem)] mx-6 mb-6 bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Add another</button>
+      <button id="add-btn" class="w-[calc(100%-3rem)] mx-6 mb-6 bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Add account</button>
       <!-- Add/Edit Form -->
       <div id="account-form" class="mt-2 hidden flex flex-col gap-2 px-6 mb-6">
         <input id="form-label" type="text" placeholder="Label" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
@@ -95,6 +108,34 @@
       <button id="import-submit" class="w-full bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition mb-2">Import</button>
       <button id="import-cancel" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-md transition">Cancel</button>
       <div id="import-error" class="text-xs text-red-400 mt-2"></div>
+    </div>
+  </div>
+  <!-- =========================
+       Reset Master Password Modal
+       ========================= -->
+  <div id="reset-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden">
+    <div class="bg-[#181c20] rounded-xl shadow-lg p-8 w-full max-w-xs flex flex-col items-center">
+      <h2 class="text-white text-xl font-bold mb-4">Reset Master Password</h2>
+      <input id="reset-old" type="password" placeholder="Current master password" class="w-full mb-3 rounded-md px-4 py-3 bg-[#23272e] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+      <input id="reset-password" type="password" placeholder="New master password" class="w-full mb-3 rounded-md px-4 py-3 bg-[#23272e] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+      <input id="reset-confirm" type="password" placeholder="Confirm new password" class="w-full mb-3 rounded-md px-4 py-3 bg-[#23272e] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+      <div id="reset-strength" class="text-xs mb-2 text-gray-400"></div>
+      <div id="reset-error" class="text-xs text-red-400 mb-2"></div>
+      <button id="reset-save" class="w-full bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition mb-2">Save</button>
+      <button id="reset-cancel" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-md transition">Cancel</button>
+    </div>
+  </div>
+  <!-- =========================
+       Export Data Modal
+       ========================= -->
+  <div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden">
+    <div class="bg-[#181c20] rounded-xl shadow-lg p-8 w-full max-w-xs flex flex-col items-center">
+      <h2 class="text-white text-xl font-bold mb-4">Export Data</h2>
+      <div class="w-full flex flex-col gap-3 mb-4">
+        <button id="export-dat" class="w-full bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Export as .dat (encrypted)</button>
+        <button id="export-json" class="w-full bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">Export as .json (readable)</button>
+      </div>
+      <button id="export-cancel" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-md transition">Cancel</button>
     </div>
   </div>
   <script src="./renderer.js"></script>

@@ -27,7 +27,6 @@ const importBtn = document.getElementById('import-btn');
 const importFile = document.getElementById('import-file');
 const mainList = document.getElementById('accounts-list');
 const addBtn = document.getElementById('add-btn');
-const exportBtn = document.getElementById('export-btn');
 const accountForm = document.getElementById('account-form');
 const formLabel = document.getElementById('form-label');
 const formIssuer = document.getElementById('form-issuer');
@@ -40,6 +39,23 @@ const importPasswordInput = document.getElementById('import-password');
 const importSubmit = document.getElementById('import-submit');
 const importCancel = document.getElementById('import-cancel');
 const importError = document.getElementById('import-error');
+const menuBtn = document.getElementById('menu-btn');
+const menuDropdown = document.getElementById('menu-dropdown');
+const menuExportData = document.getElementById('menu-export-data');
+const menuReset = document.getElementById('menu-reset');
+const resetModal = document.getElementById('reset-modal');
+const resetPassword = document.getElementById('reset-password');
+const resetConfirm = document.getElementById('reset-confirm');
+const resetStrength = document.getElementById('reset-strength');
+const resetError = document.getElementById('reset-error');
+const resetSave = document.getElementById('reset-save');
+const resetCancel = document.getElementById('reset-cancel');
+const resetOld = document.getElementById('reset-old');
+const menuImport = document.getElementById('menu-import');
+const exportModal = document.getElementById('export-modal');
+const exportDat = document.getElementById('export-dat');
+const exportJson = document.getElementById('export-json');
+const exportCancel = document.getElementById('export-cancel');
 
 // =========================
 // State
@@ -50,7 +66,7 @@ let editIndex = null;
 let timer = null;
 let importFilePath = null;
 let autoLockTimer = null;
-const AUTO_LOCK_SECONDS = 45;
+const AUTO_LOCK_SECONDS = 120;
 
 // =========================
 // Utility Functions
@@ -327,7 +343,7 @@ unlockBtn.addEventListener('click', async () => {
 
 // Import Vault
 importBtn.addEventListener('click', () => {
-  if (!confirm('Warning: Importing a vault will erase all your existing encrypted TOTP data and replace it with the imported vault. Do you want to continue?')) {
+  if (!confirm("Importing a vault will replace any existing data (if any). Continue?")) {
     return;
   }
   importFile.value = '';
@@ -356,6 +372,43 @@ importSubmit.addEventListener('click', async () => {
     return;
   }
   try {
+    // Read and parse the file
+    const fs = require('fs');
+    const raw = fs.readFileSync(importFilePath, 'utf8');
+    let encrypted;
+    try {
+      encrypted = JSON.parse(raw);
+    } catch (err) {
+      importError.textContent = 'The selected file is not a valid vault file (invalid JSON).';
+      return;
+    }
+    // Basic structure check
+    if (!encrypted || typeof encrypted !== 'object' || !encrypted.salt || !encrypted.iv || !encrypted.tag || !encrypted.data) {
+      importError.textContent = 'The selected file is not a valid encrypted vault.';
+      return;
+    }
+    // Try to decrypt and validate structure
+    let data;
+    try {
+      const { decrypt } = require('../services/encryptionService');
+      data = await decrypt(encrypted, password);
+    } catch (err) {
+      importError.textContent = 'Failed to decrypt vault: ' + err.message;
+      return;
+    }
+    if (!data || typeof data !== 'object' || !Array.isArray(data.accounts)) {
+      importError.textContent = 'The vault file is missing required data or is corrupted.';
+      return;
+    }
+    // Optionally: validate each account object
+    for (const acc of data.accounts) {
+      if (!acc.label || !acc.secret) {
+        importError.textContent = 'The vault contains invalid account data.';
+        return;
+      }
+    }
+    // If all checks pass, replace the vault
+    const Vault = require('../models/Vault');
     await Vault.importVault(importFilePath, password);
     importModal.classList.add('hidden');
     alert('Vault imported. Please unlock with the imported password.');
@@ -367,29 +420,6 @@ importSubmit.addEventListener('click', async () => {
 
 importCancel.addEventListener('click', () => {
   importModal.classList.add('hidden');
-});
-
-// Export Vault
-exportBtn.addEventListener('click', async () => {
-  const remote = window.require('@electron/remote');
-  const { dialog } = remote;
-  const fs = require('fs');
-  const path = require('path');
-  const vaultPath = path.join(__dirname, '..', 'vault.dat');
-  const result = await dialog.showSaveDialog({
-    title: 'Export Vault',
-    defaultPath: 'vault.dat',
-    filters: [{ name: 'Vault Data', extensions: ['dat'] }]
-  });
-  if (!result.canceled && result.filePath) {
-    fs.copyFile(vaultPath, result.filePath, (err) => {
-      if (err) {
-        alert('Failed to export vault: ' + err.message);
-      } else {
-        alert('Vault exported successfully!');
-      }
-    });
-  }
 });
 
 // Add Account
@@ -442,12 +472,12 @@ formSave.addEventListener('click', async () => {
     formError.textContent = 'Secret must be base32.';
     return;
   }
-  // Duplicate check commented out for now
-  // const isDuplicate = vault.accounts.some((acc, idx) => acc.secret.replace(/\s+/g, '').toUpperCase() === secret && (editIndex === null || idx !== editIndex));
-  // if (isDuplicate) {
-  //   formError.textContent = 'This secret already exists.';
-  //   return;
-  // }
+  // Prevent duplicate secrets (except when editing the same account)
+  const isDuplicate = vault.accounts.some((acc, idx) => acc.secret.replace(/\s+/g, '').toUpperCase() === secret && (editIndex === null || idx !== editIndex));
+  if (isDuplicate) {
+    formError.textContent = 'This secret already exists.';
+    return;
+  }
   let acc;
   if (editIndex !== null) {
     // Preserve addedDate if editing
@@ -532,4 +562,153 @@ function resetAutoLockTimer() {
 });
 // Reset timer on unlock or setup
 setupBtn.addEventListener('click', resetAutoLockTimer);
-unlockBtn.addEventListener('click', resetAutoLockTimer); 
+unlockBtn.addEventListener('click', resetAutoLockTimer);
+
+// Hamburger menu logic
+menuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  menuDropdown.classList.toggle('hidden');
+});
+document.addEventListener('click', (e) => {
+  if (!menuDropdown.classList.contains('hidden')) {
+    menuDropdown.classList.add('hidden');
+  }
+});
+menuDropdown.addEventListener('click', (e) => {
+  e.stopPropagation(); // Prevent closing when clicking inside
+});
+
+// Show export modal
+menuExportData.addEventListener('click', () => {
+  menuDropdown.classList.add('hidden');
+  exportModal.classList.remove('hidden');
+});
+// Hide export modal
+exportCancel.addEventListener('click', () => {
+  exportModal.classList.add('hidden');
+});
+// Export as .dat
+exportDat.addEventListener('click', async () => {
+  exportModal.classList.add('hidden');
+  const remote = window.require('@electron/remote');
+  const { dialog } = remote;
+  const fs = require('fs');
+  const path = require('path');
+  const vaultPath = path.join(__dirname, '..', 'vault.dat');
+  const result = await dialog.showSaveDialog({
+    title: 'Export Vault',
+    defaultPath: 'vault.dat',
+    filters: [{ name: 'Vault Data', extensions: ['dat'] }]
+  });
+  if (!result.canceled && result.filePath) {
+    fs.copyFile(vaultPath, result.filePath, (err) => {
+      if (err) {
+        alert('Failed to export vault: ' + err.message);
+      } else {
+        alert('Vault exported successfully!');
+      }
+    });
+  }
+});
+// Export as JSON
+exportJson.addEventListener('click', async () => {
+  exportModal.classList.add('hidden');
+  try {
+    const remote = window.require('@electron/remote');
+    const { dialog } = remote;
+    const fs = require('fs');
+    if (!vault || !vault.accounts) {
+      alert('No vault data to export.');
+      return;
+    }
+    // Remove 'tags' property from each account for export
+    const exportAccounts = vault.accounts.map(acc => ({
+      label: acc.label,
+      secret: acc.secret,
+      issuer: acc.issuer,
+      addedDate: acc.addedDate
+    }));
+    const jsonData = JSON.stringify(exportAccounts, null, 2);
+    const result = await dialog.showSaveDialog({
+      title: 'Export Accounts as JSON',
+      defaultPath: 'accounts.json',
+      filters: [{ name: 'JSON', extensions: ['json'] }]
+    });
+    if (!result.canceled && result.filePath) {
+      fs.writeFile(result.filePath, jsonData, 'utf8', (err) => {
+        if (err) {
+          alert('Failed to export JSON: ' + err.message);
+        } else {
+          alert('Accounts exported as JSON successfully!');
+        }
+      });
+    }
+  } catch (err) {
+    alert('Failed to export JSON: ' + err.message);
+  }
+});
+
+// Show reset modal on menu-reset click
+menuReset.addEventListener('click', () => {
+  menuDropdown.classList.add('hidden');
+  resetOld.value = '';
+  resetPassword.value = '';
+  resetConfirm.value = '';
+  resetStrength.textContent = '';
+  resetError.textContent = '';
+  resetModal.classList.remove('hidden');
+  resetOld.focus();
+});
+
+// Hide reset modal on cancel
+resetCancel.addEventListener('click', () => {
+  resetModal.classList.add('hidden');
+});
+
+// Password strength check
+resetPassword.addEventListener('input', () => {
+  const pw = resetPassword.value;
+  resetStrength.textContent = passwordStrength(pw);
+});
+
+// Save new master password
+resetSave.addEventListener('click', async () => {
+  const oldPw = resetOld.value;
+  const pw = resetPassword.value;
+  const confirm = resetConfirm.value;
+  resetError.textContent = '';
+  if (!oldPw || !pw || !confirm) {
+    resetError.textContent = 'Please fill in all fields.';
+    return;
+  }
+  // Validate old password
+  try {
+    // Try to load the vault with the old password
+    await Vault.load(oldPw);
+  } catch (err) {
+    resetError.textContent = 'Current password is incorrect.';
+    return;
+  }
+  if (pw !== confirm) {
+    resetError.textContent = 'Passwords do not match.';
+    return;
+  }
+  if (passwordStrength(pw) !== 'OK') {
+    resetError.textContent = 'Password is too weak.';
+    return;
+  }
+  try {
+    await vault.save(pw); // Re-encrypt vault with new password
+    masterPassword = pw;
+    resetModal.classList.add('hidden');
+    alert('Master password has been reset!');
+  } catch (err) {
+    resetError.textContent = 'Failed to reset password: ' + err.message;
+  }
+});
+
+// Hamburger menu import logic
+menuImport.addEventListener('click', () => {
+  menuDropdown.classList.add('hidden');
+  importBtn.click(); // Reuse the existing import logic
+}); 
