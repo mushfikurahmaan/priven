@@ -138,6 +138,21 @@
       <button id="export-cancel" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-md transition">Cancel</button>
     </div>
   </div>
+  <!-- =========================
+       Custom Modal (for alert/confirm/prompt)
+       ========================= -->
+  <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden">
+    <div class="bg-[#181c20] rounded-xl shadow-lg p-8 w-full max-w-xs flex flex-col items-center">
+      <h2 id="custom-modal-title" class="text-white text-xl font-bold mb-4"></h2>
+      <div id="custom-modal-message" class="text-white text-base mb-4 text-center"></div>
+      <input id="custom-modal-input" class="w-full mb-4 rounded-md px-4 py-3 bg-[#23272e] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 hidden" />
+      <div class="flex w-full gap-2">
+        <button id="custom-modal-ok" class="flex-1 bg-[#5c77ff] hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition">OK</button>
+        <button id="custom-modal-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-md transition hidden">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- END Custom Modal -->
   <script src="./renderer.js"></script>
 </body>
 </html> 

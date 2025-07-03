@@ -69,6 +69,64 @@ let autoLockTimer = null;
 const AUTO_LOCK_SECONDS = 120;
 
 // =========================
+// Custom Modal Logic
+// =========================
+const customModal = document.getElementById('custom-modal');
+const customModalTitle = document.getElementById('custom-modal-title');
+const customModalMessage = document.getElementById('custom-modal-message');
+const customModalInput = document.getElementById('custom-modal-input');
+const customModalOk = document.getElementById('custom-modal-ok');
+const customModalCancel = document.getElementById('custom-modal-cancel');
+
+function showCustomModal({ title = '', message = '', input = false, defaultValue = '', okText = 'OK', cancelText = 'Cancel', showCancel = false }) {
+  return new Promise((resolve) => {
+    customModalTitle.textContent = title;
+    customModalMessage.textContent = message;
+    customModalInput.value = defaultValue;
+    customModalInput.classList.toggle('hidden', !input);
+    customModalOk.textContent = okText;
+    customModalCancel.textContent = cancelText;
+    customModalCancel.classList.toggle('hidden', !showCancel);
+    customModal.classList.remove('hidden');
+    customModalInput.type = input ? 'text' : 'hidden';
+    if (input) {
+      setTimeout(() => customModalInput.focus(), 100);
+    }
+    function cleanup() {
+      customModal.classList.add('hidden');
+      customModalOk.onclick = null;
+      customModalCancel.onclick = null;
+      document.onkeydown = null;
+    }
+    customModalOk.onclick = () => {
+      cleanup();
+      resolve(input ? customModalInput.value : true);
+    };
+    customModalCancel.onclick = () => {
+      cleanup();
+      resolve(input ? null : false);
+    };
+    document.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        customModalOk.click();
+      } else if (e.key === 'Escape' && showCancel) {
+        customModalCancel.click();
+      }
+    };
+  });
+}
+
+window.alert = function(message) {
+  return showCustomModal({ title: 'Alert', message });
+};
+window.confirm = function(message) {
+  return showCustomModal({ title: 'Confirm', message, showCancel: true });
+};
+window.prompt = function(message, defaultValue = '') {
+  return showCustomModal({ title: 'Prompt', message, input: true, defaultValue, showCancel: true });
+};
+
+// =========================
 // Utility Functions
 // =========================
 /**
@@ -211,10 +269,10 @@ function renderAccounts() {
         stopTimer();
       };
       // Delete
-      menu.querySelector('.context-delete').onclick = (ev) => {
+      menu.querySelector('.context-delete').onclick = async (ev) => {
         ev.stopPropagation();
         menu.remove();
-        if (confirm('Delete this account?')) {
+        if (await window.confirm('Delete this account?')) {
           vault.deleteAccount(idx);
           vault.save(masterPassword);
           renderAccounts();
@@ -342,8 +400,8 @@ unlockBtn.addEventListener('click', async () => {
 });
 
 // Import Vault
-importBtn.addEventListener('click', () => {
-  if (!confirm("Importing a vault will replace any existing data (if any). Continue?")) {
+importBtn.addEventListener('click', async () => {
+  if (!(await window.confirm("Importing a vault will replace any existing data (if any). Continue?"))) {
     return;
   }
   importFile.value = '';

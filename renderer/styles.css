@@ -29,4 +29,14 @@
 #accounts-list {
   scrollbar-width: thin;
   scrollbar-color: #5271ff #181c20;
+}
+
+/* =========================
+   Custom Modal Styles
+   ========================= */
+#custom-modal .focus\:ring-2:focus {
+  box-shadow: 0 0 0 2px #5c77ff;
+}
+#custom-modal .transition {
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 } 
