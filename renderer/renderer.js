@@ -9,6 +9,7 @@ const TOTPAccount = require('../models/TOTPAccount');
 const { generateTOTP } = require('../services/totpService');
 const path = require('path');
 const os = require('os');
+const { remote } = require('electron');
 
 // =========================
 // UI Element References
@@ -179,8 +180,9 @@ function clearForm() {
  * Get the icon for a given issuer.
  */
 function getIssuerIcon(issuer) {
-  if (!issuer) return '../assets/default.png';
+  if (!issuer) return '../assets/default-auth.png';
   const name = issuer.toLowerCase();
+  // Popular services
   if (name.includes('google')) return '../assets/google.png';
   if (name.includes('microsoft') || name.includes('outlook') || name.includes('office')) return '../assets/microsoft.png';
   if (name.includes('facebook')) return '../assets/facebook.png';
@@ -198,6 +200,58 @@ function getIssuerIcon(issuer) {
   if (name.includes('steam')) return '../assets/steam.png';
   if (name.includes('yahoo')) return '../assets/yahoo.png';
   if (name.includes('zoom')) return '../assets/zoom.png';
+  // More popular and underrated services
+  if (name.includes('notion')) return '../assets/notion.png';
+  if (name.includes('tiktok')) return '../assets/tiktok.png';
+  if (name.includes('protonmail')) return '../assets/protonmail.png';
+  if (name.includes('bitwarden')) return '../assets/bitwarden.png';
+  if (name.includes('1password')) return '../assets/1password.png';
+  if (name.includes('lastpass')) return '../assets/lastpass.png';
+  if (name.includes('mega')) return '../assets/mega.png';
+  if (name.includes('coinbase')) return '../assets/coinbase.png';
+  if (name.includes('binance')) return '../assets/binance.png';
+  if (name.includes('okta')) return '../assets/okta.png';
+  if (name.includes('authy')) return '../assets/authy.png';
+  if (name.includes('duo')) return '../assets/duo.png';
+  if (name.includes('mailchimp')) return '../assets/mailchimp.png';
+  if (name.includes('heroku')) return '../assets/heroku.png';
+  if (name.includes('digitalocean')) return '../assets/digitalocean.png';
+  if (name.includes('gitlab')) return '../assets/gitlab.png';
+  if (name.includes('atlassian') || name.includes('jira') || name.includes('confluence')) return '../assets/atlassian.png';
+  if (name.includes('adobe')) return '../assets/adobe.png';
+  if (name.includes('airbnb')) return '../assets/airbnb.png';
+  if (name.includes('uber')) return '../assets/uber.png';
+  if (name.includes('lyft')) return '../assets/lyft.png';
+  if (name.includes('snapchat')) return '../assets/snapchat.png';
+  if (name.includes('pinterest')) return '../assets/pinterest.png';
+  if (name.includes('twitch')) return '../assets/twitch.png';
+  if (name.includes('yandex')) return '../assets/yandex.png';
+  if (name.includes('vk')) return '../assets/vk.png';
+  if (name.includes('booking')) return '../assets/booking.png';
+  if (name.includes('stripe')) return '../assets/stripe.png';
+  if (name.includes('shopify')) return '../assets/shopify.png';
+  if (name.includes('ebay')) return '../assets/ebay.png';
+  if (name.includes('netflix')) return '../assets/netflix.png';
+  if (name.includes('hulu')) return '../assets/hulu.png';
+  if (name.includes('crunchyroll')) return '../assets/crunchyroll.png';
+  if (name.includes('soundcloud')) return '../assets/soundcloud.png';
+  if (name.includes('spotify')) return '../assets/spotify.png';
+  if (name.includes('telegram')) return '../assets/telegram.png';
+  if (name.includes('whatsapp')) return '../assets/whatsapp.png';
+  if (name.includes('signal')) return '../assets/signal.png';
+  if (name.includes('kick')) return '../assets/kick.png';
+  if (name.includes('rumble')) return '../assets/rumble.png';
+  if (name.includes('mastodon')) return '../assets/mastodon.png';
+  if (name.includes('bluesky')) return '../assets/bluesky.png';
+  if (name.includes('threads')) return '../assets/threads.png';
+  if (name.includes('bilibili')) return '../assets/bilibili.png';
+  if (name.includes('wechat')) return '../assets/wechat.png';
+  if (name.includes('line')) return '../assets/line.png';
+  if (name.includes('viber')) return '../assets/viber.png';
+  if (name.includes('wechat')) return '../assets/wechat.png';
+  if (name.includes('weibo')) return '../assets/weibo.png';
+  if (name.includes('tencent')) return '../assets/tencent.png';
+  // Add more services below as needed, just follow the pattern above
   return '../assets/default-auth.png';
 }
 
@@ -283,7 +337,7 @@ function renderAccounts() {
       menu.querySelector('.context-delete').onclick = async (ev) => {
         ev.stopPropagation();
         menu.remove();
-        if (await window.confirm('Delete this account?')) {
+        if (await showDestructiveConfirm('Delete this account?')) {
           vault.deleteAccount(idx);
           vault.save(masterPassword);
           renderAccounts();
@@ -533,7 +587,7 @@ importFindBtn.addEventListener('click', async () => {
     const Vault = require('../models/Vault');
     await Vault.importVault(backupPath, password);
     importModal.classList.add('hidden');
-    await window.alert('Vault imported successfully! Please unlock with the imported password.');
+    await showSuccess('Vault imported successfully! Please unlock with the imported password.');
     window.location.reload();
   } catch (err) {
     importError.textContent = 'Failed to import vault: ' + err.message;
@@ -597,7 +651,7 @@ importFile.addEventListener('change', async (e) => {
     }
     const Vault = require('../models/Vault');
     await Vault.importVault(importFilePath, password);
-    await window.alert('Vault imported successfully! Please unlock with the imported password.');
+    await showSuccess('Vault imported successfully! Please unlock with the imported password.');
     window.location.reload();
   } catch (err) {
     alert('Failed to import vault: ' + err.message);
@@ -905,4 +959,24 @@ welcomeImportLocalBtn.addEventListener('click', () => {
 });
 welcomeImportGoogleBtn.addEventListener('click', () => {
   window.alert('Import from Google Drive is coming soon!');
+});
+
+// Helper for success popups
+function showSuccess(message) {
+  return showCustomModal({ title: 'Success', message, okText: 'OK' });
+}
+
+// Helper for destructive confirmation popups
+function showDestructiveConfirm(message) {
+  return showCustomModal({ title: 'Are you sure?', message, okText: 'Delete', cancelText: 'Cancel', showCancel: true });
+}
+
+// Custom window controls for frameless window
+window.addEventListener('DOMContentLoaded', () => {
+  const remote = window.require('@electron/remote');
+  const win = remote.getCurrentWindow();
+  const minBtn = document.getElementById('min-btn');
+  const closeBtn = document.getElementById('close-btn');
+  if (minBtn) minBtn.onclick = () => win.minimize();
+  if (closeBtn) closeBtn.onclick = () => win.close();
 }); 

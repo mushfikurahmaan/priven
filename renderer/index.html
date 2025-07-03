@@ -8,44 +8,60 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=400, initial-scale=1.0">
-  <title>Priven - TOTP Authenticator</title>
+  <title>Priven - Authenticator</title>
+  <!-- Google Fonts: Epilogue and IBM Plex Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="./output.css" rel="stylesheet">
 </head>
-<body class="bg-[#111518] w-screen h-screen min-h-screen min-w-screen overflow-hidden">
+<body class="bg-[#141414] w-screen h-screen min-h-screen min-w-screen overflow-hidden">
+  <div class="custom-titlebar" style="padding-left: 12px;">
+    <img src="../assets/logo.png" class="app-icon" />
+    <span class="app-title">Priven - Authenticator</span>
+    <div class="window-controls">
+      <button id="min-btn" aria-label="Minimize">&minus;</button>
+      <button id="close-btn" aria-label="Close">&times;</button>
+    </div>
+  </div>
   <!-- =========================
        Welcome Screen (First Launch)
        ========================= -->
-  <div id="welcome-container" class="hidden flex flex-col gap-4 items-center justify-center w-screen h-screen bg-black">
-    <img src="../assets/Security_Shield.gif" alt="Security Animation" class="w-48 h-48 object-contain mb-2 mt-2 select-none" draggable="false" style="max-width: 80vw; max-height: 40vh;" />
-    <h1 class="text-white text-4xl font-extrabold leading-tight mb-0">Priven</h1>
-    <span class="text-white text-lg opacity-70 mb-6 -mt-1">Minimal TOTP Authenticator</span>
+  <div id="welcome-container" class="hidden flex flex-col gap-4 items-center justify-center w-screen h-screen bg-[#141414]">
+    <video src="../assets/intro.mp4" autoplay muted playsinline class="w-80 h-80 object-contain mb-2 mt-2 select-none" style="max-width: 100vw; max-height: 70vh;"></video>
     <div class="flex-1"></div>
-    <div class="w-full flex flex-col gap-1 items-center mb-8 pb-8">
-      <button id="welcome-create-btn" class="w-4/5 max-w-md glass-btn font-semibold py-2 rounded-md transition text-base flex items-center justify-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#8bc34a"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    <div class="w-full flex flex-col gap-[6px] items-center mb-8 pb-8">
+      <button id="welcome-create-btn" class="w-4/5 max-w-md glass-btn font-semibold py-2 rounded-md transition text-base flex items-center justify-start gap-3 pl-8">
+        <span class="w-6 flex justify-center">
+          <img src="../assets/add.png" alt="Add Account" class="h-5 w-5" />
+        </span>
         Create from Scratch
       </button>
-      <button id="welcome-import-local-btn" class="w-4/5 max-w-md glass-btn font-semibold py-2 rounded-md transition text-base flex items-center justify-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 align-middle" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="13" rx="2" fill="#ffd600"/><path d="M2 7l4-4h6l4 4" fill="#ff9800"/><rect x="2" y="7" width="20" height="13" rx="2" fill="none" stroke="#ff9800" stroke-width="1.5"/></svg>
+      
+      <button id="welcome-import-local-btn" class="w-4/5 max-w-md glass-btn font-semibold py-2 rounded-md transition text-base flex items-center justify-start gap-3 pl-8">
+        <span class="w-6 flex justify-center">
+          <img src="../assets/windows-11.png" alt="Local" class="h-5 w-5" />
+        </span>
         Import from Local
       </button>
-      <button id="welcome-import-google-btn" class="w-4/5 max-w-md glass-btn-dark font-semibold py-2 rounded-md transition text-base flex items-center justify-center gap-2">
-        <img src="../assets/google.png" alt="Google" class="h-5 w-5 align-middle" style="margin-right: 0.25rem;" />
+      
+      <button id="welcome-import-google-btn" class="w-4/5 max-w-md glass-btn-dark font-semibold py-2 rounded-md transition text-base flex items-center justify-start gap-3 pl-8">
+        <span class="w-6 flex justify-center">
+          <img src="../assets/google.png" alt="Google" class="h-5 w-5" />
+        </span>
         Import from Google Drive
       </button>
-    </div>
+    </div>    
   </div>
   <!-- =========================
        Login Screen
        ========================= -->
   <div id="unlock-container">
-    <div class="w-screen h-screen flex flex-col justify-between items-center bg-black">
+    <div class="w-screen h-screen flex flex-col justify-between items-center bg-[#141414]">
       <div class="flex-1 flex flex-col justify-center items-center w-full" style="min-height: 0;">
         <img src="../assets/logo.png" alt="Priven Logo" class="w-24 h-24 mb-4 mt-2 select-none" draggable="false" />
         <h1 class="text-white text-4xl font-extrabold leading-tight mb-0">Priven</h1>
         <span class="text-white text-lg opacity-70 mb-10 -mt-1">Minimal TOTP Authenticator</span>
         <div class="relative w-4/5 max-w-md mb-4">
-          <input id="unlock-password" type="password" placeholder="Master password" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
+          <input id="unlock-password" type="password" placeholder="Master password" class="w-full rounded-md px-4 py-3 bg-[#141414] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
           <button id="toggle-unlock-password" type="button" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none">
             <svg id="unlock-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
@@ -53,25 +69,25 @@
         <div id="unlock-error" class="text-xs text-red-400 mb-8"></div>
       </div>
       <div class="w-full flex flex-col gap-3 items-center mb-10">
-        <button id="unlock-btn" class="w-4/5 max-w-md glass-btn font-semibold py-2 rounded-md transition text-sm">Unlock</button>
+        <button id="unlock-btn" class="w-4/5 max-w-md glass-btn font-semibold py-2 rounded-md transition text-sm mb-4">Unlock</button>
       </div>
     </div>
   </div>
   <!-- =========================
        Setup (Master Password) Screen
        ========================= -->
-  <div id="setup-container" class="hidden flex flex-col gap-4 items-center justify-center w-screen h-screen bg-black">
+  <div id="setup-container" class="hidden flex flex-col gap-4 items-center justify-center w-screen h-screen bg-[#141414]">
     <img src="../assets/logo.png" alt="Priven Logo" class="w-24 h-24 mb-2 mt-2 select-none" draggable="false" />
     <h1 class="text-white text-4xl font-extrabold leading-tight mb-0">Priven</h1>
     <span class="text-white text-lg opacity-70 mb-6 -mt-1">Minimal TOTP Authenticator</span>
     <div class="relative w-4/5 max-w-md">
-      <input id="setup-password" type="password" placeholder="Master password" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
+      <input id="setup-password" type="password" placeholder="Master password" class="w-full rounded-md px-4 py-3 bg-[#141414] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
       <button id="toggle-setup-password" type="button" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none">
         <svg id="setup-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
       </button>
     </div>
     <div class="relative w-4/5 max-w-md">
-      <input id="setup-confirm" type="password" placeholder="Confirm password" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
+      <input id="setup-confirm" type="password" placeholder="Confirm password" class="w-full rounded-md px-4 py-3 bg-[#141414] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600 pr-10" />
       <button id="toggle-setup-confirm" type="button" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none">
         <svg id="setup-confirm-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
       </button>
@@ -86,12 +102,12 @@
   <!-- =========================
        Main App Screen
        ========================= -->
-  <div id="main-container" class="hidden w-screen h-screen flex flex-col bg-black">
+  <div id="main-container" class="hidden w-screen h-screen flex flex-col bg-[#141414]">
     <div class="flex items-center justify-between mb-4 p-6">
       <span class="font-bold text-white text-base">Your TOTP Accounts</span>
       <!-- Hamburger Menu -->
       <div class="relative">
-        <button id="menu-btn" class="flex items-center justify-center w-10 h-10 rounded-lg bg-[#181c20] hover:bg-[#23272e] focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button id="menu-btn" class="flex items-center justify-center w-10 h-10 rounded-lg bg-[#141414] hover:bg-[#23272e] focus:outline-none focus:ring-2 focus:ring-blue-400">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
             <line x1="4" y1="6" x2="20" y2="6" />
             <line x1="4" y1="12" x2="20" y2="12" />
@@ -110,9 +126,9 @@
       <button id="add-btn" class="w-[calc(100%-3rem)] mx-6 mb-6 glass-btn font-semibold py-2 rounded-md transition">Add account</button>
       <!-- Add/Edit Form -->
       <div id="account-form" class="mt-2 hidden flex flex-col gap-2 px-6 mb-6">
-        <input id="form-label" type="text" placeholder="Label" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
-        <input id="form-issuer" type="text" placeholder="Issuer" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
-        <input id="form-secret" type="text" placeholder="Secret (base32)" class="w-full rounded-md px-4 py-3 bg-[#181c20] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+        <input id="form-label" type="text" placeholder="Label" class="w-full rounded-md px-4 py-3 bg-[#141414] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+        <input id="form-issuer" type="text" placeholder="Issuer" class="w-full rounded-md px-4 py-3 bg-[#141414] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
+        <input id="form-secret" type="text" placeholder="Secret (base32)" class="w-full rounded-md px-4 py-3 bg-[#141414] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
         <div class="flex gap-2 mt-2 w-full">
           <button id="form-save" class="flex-1 glass-btn font-semibold py-2 rounded-md transition">Save</button>
           <button id="form-cancel" class="flex-1 glass-btn-dark font-semibold py-2 rounded-md transition">Cancel</button>
@@ -124,8 +140,8 @@
   <!-- =========================
        Import Vault Modal
        ========================= -->
-  <div id="import-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden">
-    <div class="bg-[#181c20] rounded-xl shadow-lg p-8 w-full max-w-xs flex flex-col items-center">
+  <div id="import-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-[#141414] bg-opacity-60 hidden">
+    <div class="bg-[#141414] rounded-xl shadow-lg p-8 w-full max-w-xs flex flex-col items-center">
       <h2 class="text-white text-xl font-bold mb-4">Import Vault</h2>
       <input id="import-password" type="password" placeholder="Master password for vault" class="w-full mb-4 rounded-md px-4 py-3 bg-[#23272e] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base border border-gray-600" />
       <button id="import-find-btn" class="w-full glass-btn text-white font-semibold py-2 rounded-md transition mb-2">Let app find backup</button>

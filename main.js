@@ -12,6 +12,9 @@ function createWindow() {
     minimizable: true,        // Still allow minimizing
     autoHideMenuBar: true,    // Clean look by hiding menu
     icon: path.join(__dirname, 'assets', 'logo.png'), // Set app icon
+    frame: false, // Make window frameless for custom title bar
+    titleBarStyle: 'hidden', // Hide default title bar
+    backgroundColor: '#141414', // Set window background color
     webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,

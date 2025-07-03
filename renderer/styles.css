@@ -12,7 +12,7 @@
    ========================= */
 #accounts-list::-webkit-scrollbar {
   width: 8px;
-  background: #181c20;
+  background: #141414;
   border-radius: 9999px;
 }
 #accounts-list::-webkit-scrollbar-thumb {
@@ -23,12 +23,12 @@
   background: #5c77ff;
 }
 #accounts-list::-webkit-scrollbar-track {
-  background: #181c20;
+  background: #141414;
   border-radius: 9999px;
 }
 #accounts-list {
   scrollbar-width: thin;
-  scrollbar-color: #5271ff #181c20;
+  scrollbar-color: #5271ff #141414;
 }
 
 /* =========================
@@ -105,4 +105,71 @@ input:focus, textarea:focus, select:focus {
   border-color: #9048e0 !important;
   box-shadow: 0 0 0 2px rgba(144, 72, 224, 0.25);
   outline: none;
+}
+
+/* Set default font to Epilogue (system text) and IBM Plex Mono for mono (TOTP, date, timer) */
+html, body {
+  @apply font-sans;
+}
+
+/* Custom Title Bar */
+.custom-titlebar {
+  background: #141414;
+  color: #fff;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 8px;
+  -webkit-app-region: drag;
+  user-select: none;
+  justify-content: flex-start;
+}
+.app-icon {
+  height: 16px;
+  margin-right: 4px;
+}
+.app-title {
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.1px;
+  margin-right: 8px;
+  padding-left: 2px;
+  padding-top: 1px;
+  white-space: nowrap;
+}
+.window-controls {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+  height: 100%;
+}
+.window-controls button {
+  width: 40px;
+  height: 32px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  border-radius: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s cubic-bezier(.4,0,.2,1), color 0.18s cubic-bezier(.4,0,.2,1), transform 0.12s;
+}
+.window-controls button:active {
+  transform: scale(0.92);
+}
+.window-controls button:hover {
+  background: rgba(255,255,255,0.13);
+}
+#close-btn:hover {
+  background: #e81123;
+  color: #fff;
+}
+#min-btn:hover {
+  background: #2d2d2d;
+  color: #fff;
 } 

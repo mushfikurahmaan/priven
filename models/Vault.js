@@ -4,7 +4,14 @@ const path = require('path');
 const { encrypt, decrypt } = require('../services/encryptionService');
 const os = require('os');
 
-const VAULT_FILE = path.join(__dirname, '..', 'vault.dat');
+// Use Electron's userData path for vault file
+let electronApp;
+if (process.type === 'renderer') {
+  electronApp = require('@electron/remote').app;
+} else {
+  electronApp = require('electron').app;
+}
+const VAULT_FILE = path.join(electronApp.getPath('userData'), 'vault.dat');
 
 // Helper to get backup path in user's local app data (Windows only)
 function getBackupPath() {
