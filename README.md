@@ -27,7 +27,6 @@ Priven is a minimal, offline TOTP (Time-based One-Time Password) authenticator d
 Priven automatically creates a backup of your encrypted vault every time you save changes (add, edit, or delete an account). This backup is stored locally on your computer:
 
 - **Windows:** The backup file is located at `%LOCALAPPDATA%/PrivenBackup/vault_backup.dat` (typically `C:/Users/<YourName>/AppData/Local/PrivenBackup/vault_backup.dat`).
-- **Other OS:** The backup is stored in your user data directory under a `PrivenBackup` folder.
 
 **How automatic backup works:**
 - Every time you save your vault (e.g., add, edit, or delete an account), Priven writes an up-to-date encrypted backup to the backup location above. This overwrites the previous backup.
