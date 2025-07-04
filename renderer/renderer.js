@@ -825,6 +825,12 @@ function resetAutoLockTimer() {
       masterPassword = '';
       vault = null;
       unlockPassword.value = '';
+      // Hide all modals on lock
+      if (importModal) importModal.classList.add('hidden');
+      if (resetModal) resetModal.classList.add('hidden');
+      if (exportModal) exportModal.classList.add('hidden');
+      if (docsModal) docsModal.classList.add('hidden');
+      if (customModal) customModal.classList.add('hidden');
       show(unlockContainer);
       stopTimer();
       alert('App locked due to inactivity. Please re-enter your password.');
