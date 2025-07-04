@@ -16,11 +16,11 @@
   border-radius: 9999px;
 }
 #accounts-list::-webkit-scrollbar-thumb {
-  background: #5271ff;
+  background: #9048e0;
   border-radius: 9999px;
 }
 #accounts-list::-webkit-scrollbar-thumb:hover {
-  background: #5c77ff;
+  background: #9048e0;
 }
 #accounts-list::-webkit-scrollbar-track {
   background: #141414;
@@ -28,7 +28,9 @@
 }
 #accounts-list {
   scrollbar-width: thin;
-  scrollbar-color: #5271ff #141414;
+  scrollbar-color: #9048e0 #141414;
+  margin-top: 2px;
+  margin-bottom: 1.5rem;
 }
 
 /* =========================
@@ -172,4 +174,48 @@ html, body {
 #min-btn:hover {
   background: #2d2d2d;
   color: #fff;
+}
+
+/* Add Account button distinct style */
+#add-btn {
+  background: #9048e0 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 4px 24px 0 rgba(144, 72, 224, 0.25), 0 1.5px 4px 0 rgba(0,0,0,0.10);
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-radius: 0.75rem;
+  transition: background 0.2s, box-shadow 0.2s, border 0.2s;
+}
+#add-btn:hover, #add-btn:focus {
+  background: #a86cff !important;
+  border-color: #fff !important;
+  box-shadow: 0 6px 32px 0 rgba(144, 72, 224, 0.35), 0 2px 8px 0 rgba(0,0,0,0.12);
+}
+
+/* More contrast for cards */
+.totp-card.glass-card {
+  box-shadow: 0 4px 24px 0 rgba(144, 72, 224, 0.18), 0 2px 8px 0 rgba(0,0,0,0.18);
+  border: 2px solid rgba(144, 72, 224, 0.32);
+  background: rgba(144, 72, 224, 0.18);
+}
+
+#account-form {
+  position: relative;
+  padding-bottom: 2.5rem; /* Ensure space for error message */
+}
+#form-error {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.5rem;
+  z-index: 10;
+  color: #ff4d4f;
+  font-size: 0.75rem; /* text-xs */
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px 0 rgba(144, 72, 224, 0.10);
+  pointer-events: none;
 } 

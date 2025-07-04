@@ -269,10 +269,13 @@ function getIssuerIcon(issuer) {
  */
 function renderAccounts() {
   mainList.innerHTML = '';
+  const countSpan = document.getElementById('accounts-count');
   if (!vault.accounts.length) {
     mainList.innerHTML = '<div class="text-gray-400 text-center">No accounts yet.</div>';
+    if (countSpan) countSpan.textContent = '';
     return;
   }
+  if (countSpan) countSpan.textContent = `(${vault.accounts.length})`;
   vault.accounts.forEach((acc, idx) => {
     const code = generateTOTP(acc.secret);
     const icon = getIssuerIcon(acc.issuer);
@@ -718,6 +721,10 @@ formSave.addEventListener('click', async () => {
   const secret = formSecret.value.replace(/\s+/g, '').toUpperCase();
   if (!label || !secret) {
     formError.textContent = 'Label and secret are required.';
+    return;
+  }
+  if (label.length > 15 || issuer.length > 15) {
+    formError.textContent = 'Label and issuer must be 15 characters or less.';
     return;
   }
   if (!/^[A-Z2-7]+=*$/i.test(secret)) {
