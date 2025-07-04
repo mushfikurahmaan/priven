@@ -45,13 +45,6 @@
         </span>
         Import from Local
       </button>
-      
-      <button id="welcome-import-google-btn" class="w-4/5 max-w-md glass-btn-dark font-semibold py-2 rounded-md transition text-base flex items-center justify-start gap-3 pl-8">
-        <span class="w-6 flex justify-center">
-          <img src="../assets/google.png" alt="Google" class="h-5 w-5" />
-        </span>
-        Import from Google Drive
-      </button>
     </div>    
   </div>
   <!-- =========================
@@ -121,6 +114,7 @@
         </button>
         <div id="menu-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-[#23272e] rounded-lg shadow-lg z-50 py-2">
           <button id="menu-export-data" class="w-full text-left px-4 py-2 text-white hover:bg-[#5c77ff] rounded-t-lg transition">Export data</button>
+          <button id="menu-read-docs" class="w-full text-left px-4 py-2 text-white hover:bg-[#5c77ff] transition">Read Docs</button>
           <button id="menu-reset" class="w-full text-left px-4 py-2 text-white hover:bg-[#5c77ff] transition">Reset master password</button>
           <button id="menu-import" class="w-full text-left px-4 py-2 text-white hover:bg-[#5c77ff] rounded-b-lg transition">Import another vault</button>
         </div>
@@ -200,6 +194,26 @@
     </div>
   </div>
   <!-- END Custom Modal -->
+  <!-- =========================
+       Docs Modal (Popup Style)
+       ========================= -->
+  <div id="docs-modal" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-40 pointer-events-auto"></div>
+    <div class="relative bg-[#181c20] rounded-lg shadow-2xl p-6 w-full max-w-sm flex flex-col items-center pointer-events-auto" style="box-shadow: 0 8px 32px rgba(0,0,0,0.25);">
+      <h2 class="text-white text-2xl font-bold mb-4">Priven Documentation</h2>
+      <div class="text-white text-base mb-4 text-left w-full" id="docs-main-content">
+        <b>About Priven</b><br>
+        Priven is a minimal TOTP Authenticator. It stores your TOTP secrets securely and locally on your device.<br><br>
+        <b>Important Notice</b><br>
+        <ul class="list-disc pl-5 mb-2">
+          <li>Before erasing or resetting your system, always export your data as a <b>.dat</b> file (encrypted) from the Export Data menu.</li>
+          <li>Save this file in a safe place. This ensures you can restore your accounts later.</li>
+        </ul>
+      </div>
+      <button id="docs-read-more" class="w-full glass-btn text-white font-semibold py-2 rounded-md transition mb-2">Read More</button>
+      <button id="docs-close" class="w-full glass-btn text-white font-semibold py-2 rounded-md transition">Close</button>
+    </div>
+  </div>
   <script src="./renderer.js"></script>
 </body>
 </html> 

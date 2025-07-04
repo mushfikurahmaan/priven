@@ -7,9 +7,10 @@
 const Vault = require('../models/Vault');
 const TOTPAccount = require('../models/TOTPAccount');
 const { generateTOTP } = require('../services/totpService');
+const { base32Decode } = require('../services/totpService');
 const path = require('path');
 const os = require('os');
-const { remote } = require('electron');
+const { remote, shell } = require('electron');
 
 // =========================
 // UI Element References
@@ -63,7 +64,11 @@ const importManualBtn = document.getElementById('import-manual-btn');
 const welcomeContainer = document.getElementById('welcome-container');
 const welcomeCreateBtn = document.getElementById('welcome-create-btn');
 const welcomeImportLocalBtn = document.getElementById('welcome-import-local-btn');
-const welcomeImportGoogleBtn = document.getElementById('welcome-import-google-btn');
+const menuReadDocs = document.getElementById('menu-read-docs');
+const docsModal = document.getElementById('docs-modal');
+const docsClose = document.getElementById('docs-close');
+const docsReadMore = document.getElementById('docs-read-more');
+const docsExtraContent = document.getElementById('docs-extra-content');
 
 // =========================
 // State
@@ -260,6 +265,8 @@ function getIssuerIcon(issuer) {
   if (name.includes('office 365') || name.includes('office365')) return '../assets/office365.png';
   if (name.includes('firebase')) return '../assets/firebase.png';
   if (name.includes('superbase')) return '../assets/superbase.png';
+  if (name.includes('openai')) return '../assets/openai.png';
+  if (name.includes('django')) return '../assets/django.png';
   // Add more services below as needed, just follow the pattern above
   return '../assets/default-auth.png';
 }
@@ -727,8 +734,16 @@ formSave.addEventListener('click', async () => {
     formError.textContent = 'Label and issuer must be 15 characters or less.';
     return;
   }
-  if (!/^[A-Z2-7]+=*$/i.test(secret)) {
-    formError.textContent = 'Secret must be base32.';
+  try {
+    // Check for invalid characters in base32
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    for (let i = 0; i < secret.length; i++) {
+      if (alphabet.indexOf(secret[i]) === -1) throw new Error('Invalid');
+    }
+    const decoded = base32Decode(secret);
+    if (!decoded || !decoded.length) throw new Error('Invalid');
+  } catch (e) {
+    formError.textContent = 'Secret must be a valid base32 string.';
     return;
   }
   // Prevent duplicate secrets (except when editing the same account)
@@ -985,9 +1000,6 @@ welcomeImportLocalBtn.addEventListener('click', () => {
   importModal.classList.remove('hidden');
   importFile.value = '';
 });
-welcomeImportGoogleBtn.addEventListener('click', () => {
-  window.alert('Import from Google Drive is coming soon!');
-});
 
 // Helper for success popups
 function showSuccess(message) {
@@ -1007,4 +1019,15 @@ window.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById('close-btn');
   if (minBtn) minBtn.onclick = () => win.minimize();
   if (closeBtn) closeBtn.onclick = () => win.close();
+});
+
+menuReadDocs.addEventListener('click', () => {
+  menuDropdown.classList.add('hidden');
+  docsModal.classList.remove('hidden');
+});
+docsClose.addEventListener('click', () => {
+  docsModal.classList.add('hidden');
+});
+docsReadMore.addEventListener('click', () => {
+  shell.openExternal('https://docs.google.com/document/d/11D6CszYM2RFjmAewsC20q_TCgmlUG7O1nLPFT0Bm764/edit?usp=sharing');
 }); 

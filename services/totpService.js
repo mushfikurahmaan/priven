@@ -36,4 +36,5 @@ function generateTOTP(secret, time = Date.now()) {
 
 module.exports = {
   generateTOTP,
+  base32Decode,
 }; 
