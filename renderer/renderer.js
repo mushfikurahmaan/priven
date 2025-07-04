@@ -275,7 +275,7 @@ function renderAccounts() {
     if (countSpan) countSpan.textContent = '';
     return;
   }
-  if (countSpan) countSpan.textContent = `(${vault.accounts.length})`;
+  if (countSpan) countSpan.textContent = `-${vault.accounts.length}`;
   vault.accounts.forEach((acc, idx) => {
     const code = generateTOTP(acc.secret);
     const icon = getIssuerIcon(acc.issuer);
