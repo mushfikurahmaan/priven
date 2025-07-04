@@ -251,6 +251,15 @@ function getIssuerIcon(issuer) {
   if (name.includes('wechat')) return '../assets/wechat.png';
   if (name.includes('weibo')) return '../assets/weibo.png';
   if (name.includes('tencent')) return '../assets/tencent.png';
+  if (name.includes('payoneer')) return '../assets/payoneer.png';
+  if (name.includes('fiverr')) return '../assets/fiverr.png';
+  if (name.includes('upwork')) return '../assets/upwork.png';
+  if (name.includes('cloudflare')) return '../assets/cloudflare.png';
+  if (name.includes('namecheap')) return '../assets/namecheap.png';
+  if (name === 'aws cloud' || name.includes('aws cloud')) return '../assets/aws.png';
+  if (name.includes('office 365') || name.includes('office365')) return '../assets/office365.png';
+  if (name.includes('firebase')) return '../assets/firebase.png';
+  if (name.includes('superbase')) return '../assets/superbase.png';
   // Add more services below as needed, just follow the pattern above
   return '../assets/default-auth.png';
 }
@@ -281,7 +290,10 @@ function renderAccounts() {
         <img src="${icon}" alt="${acc.issuer || 'Issuer'}" class="w-8 h-8 rounded-full bg-white p-1" />
         <div class='flex flex-col'>
           <span class='text-white font-semibold leading-tight text-base'>${acc.label}</span>
-          <span class='text-gray-200 text-xs'>${addedDate}</span>
+          <div class='flex flex-row gap-2'>
+            <span class='text-gray-400 text-xs'>${acc.issuer || ''}</span>
+            <span class='text-gray-200 text-xs'>${addedDate}</span>
+          </div>
         </div>
       </div>
       <div class='flex flex-col items-end'>
@@ -830,24 +842,33 @@ exportCancel.addEventListener('click', () => {
 // Export as .dat
 exportDat.addEventListener('click', async () => {
   exportModal.classList.add('hidden');
-  const remote = window.require('@electron/remote');
-  const { dialog } = remote;
-  const fs = require('fs');
-  const path = require('path');
-  const vaultPath = path.join(__dirname, '..', 'vault.dat');
-  const result = await dialog.showSaveDialog({
-    title: 'Export Vault',
-    defaultPath: 'vault.dat',
-    filters: [{ name: 'Vault Data', extensions: ['dat'] }]
-  });
-  if (!result.canceled && result.filePath) {
-    fs.copyFile(vaultPath, result.filePath, (err) => {
-      if (err) {
-        alert('Failed to export vault: ' + err.message);
-      } else {
-        alert('Vault exported successfully!');
-      }
+  try {
+    const remote = window.require('@electron/remote');
+    const { dialog } = remote;
+    const fs = require('fs');
+    const path = require('path');
+    const { encrypt } = require('../services/encryptionService');
+    if (!vault || !vault.accounts) {
+      alert('No vault data to export.');
+      return;
+    }
+    const encrypted = await encrypt({ accounts: vault.accounts }, masterPassword);
+    const result = await dialog.showSaveDialog({
+      title: 'Export Vault',
+      defaultPath: 'vault.dat',
+      filters: [{ name: 'Vault Data', extensions: ['dat'] }]
     });
+    if (!result.canceled && result.filePath) {
+      fs.writeFile(result.filePath, JSON.stringify(encrypted), 'utf8', (err) => {
+        if (err) {
+          alert('Failed to export vault: ' + err.message);
+        } else {
+          alert('Vault exported successfully!');
+        }
+      });
+    }
+  } catch (err) {
+    alert('Failed to export vault: ' + err.message);
   }
 });
 // Export as JSON

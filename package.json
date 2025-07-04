@@ -1,7 +1,7 @@
 {
   "name": "priven",
   "productName": "Priven",
-  "version": "1.1.26",
+  "version": "1.2.26",
   "description": "TOTP Authenticator App built with Electron and Tailwind CSS",
   "main": "main.js",
   "scripts": {
